@@ -4,29 +4,31 @@ This folder contains the Node.js + Express + TypeScript backend using Prisma and
 
 Setup
 
-1. Copy `.env.example` to `.env` and fill in `DATABASE_URL`, `JWT_SECRET`, and `JWT_REFRESH_SECRET`.
+1. Create a Neon project and copy your PostgreSQL connection string into `DATABASE_URL`.
 
-2. Install dependencies:
+2. Copy `.env.example` to `.env` and fill in `JWT_SECRET` and `JWT_REFRESH_SECRET`.
+
+3. Install dependencies:
 
 ```bash
 cd backend
 npm install
 ```
 
-3. Generate Prisma client and run migrations (you need a running Postgres instance):
+4. Generate Prisma client and run migrations against Neon:
 
 ```bash
 npm run generate
 npm run migrate
 ```
 
-4. Seed the database:
+5. Seed the database:
 
 ```bash
 npm run seed
 ```
 
-5. Start dev server:
+6. Start dev server:
 
 ```bash
 npm run dev

@@ -11,6 +11,11 @@ async function main() {
   const adminHash = await bcrypt.hash('adminpass', salt)
   const memberHash = await bcrypt.hash('memberpass', salt)
 
+  await prisma.comment.deleteMany()
+  await prisma.task.deleteMany()
+  await prisma.projectMember.deleteMany()
+  await prisma.project.deleteMany()
+
   const admin = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},

@@ -3,6 +3,7 @@ import prisma from '../prisma/client'
 
 export async function getDashboard(req: Request, res: Response) {
   const user = (req as any).user
+  const currentUser = await prisma.user.findUnique({ where: { id: user.id }, select: { name: true } })
   const myTasks = await prisma.task.findMany({ where: { assigneeId: user.id }, include: { project: true } })
 
   const overdueCount = await prisma.task.count({ where: { dueDate: { lt: new Date() }, status: { not: 'DONE' }, assigneeId: user.id } })
@@ -18,5 +19,5 @@ export async function getDashboard(req: Request, res: Response) {
   const recentTasks = await prisma.task.findMany({ take: 5, orderBy: { createdAt: 'desc' }, include: { createdBy: true } })
   const recentActivity = [...recentComments.map(c => ({ type: 'comment', createdAt: c.createdAt, data: c })), ...recentTasks.map(t => ({ type: 'task', createdAt: t.createdAt, data: t }))].sort((a,b)=> b.createdAt.getTime()-a.createdAt.getTime()).slice(0,10)
 
-  res.json({ myTasks, overdueCount, projectCount, tasksByStatus, recentActivity })
+  res.json({ userName: currentUser?.name, myTasks, overdueCount, projectCount, tasksByStatus, recentActivity })
 }
