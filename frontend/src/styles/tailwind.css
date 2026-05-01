@@ -3,34 +3,176 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0F0F13;
-  --surface: #16161D;
-  --border: #2A2A35;
-  --primary: #7C3AED;
-  --primary-hover: #8B5CF6;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #F43F5E;
-  --text-primary: #F1F0F4;
-  --text-secondary: #8B8A99;
+  --bg-base: #000000;
+  --bg-surface: #050505;
+  --bg-raised: #0A0A0A;
+  --bg-overlay: rgba(10, 10, 10, 0.8);
+
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-card: rgba(255, 255, 255, 0.05);
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-violet: rgba(124, 58, 237, 0.40);
+
+  --violet: #8B5CF6;
+  --violet-light: #A78BFA;
+  --violet-dim: rgba(139, 92, 246, 0.15);
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #888888;
+  --text-muted: #444444;
+  --text-violet: #C4B5FD;
+
+  --green: #34D399;
+  --amber: #FBBF24;
+  --red: #F87171;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
 }
 
-html, body, #root {
-  height: 100%;
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-bg-base text-text-primary antialiased;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
+@layer components {
+  /* Interaction System */
+  
+  .card-hover {
+    @apply border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.01)] transition-all ease-out duration-300;
+  }
+  .card-hover:hover {
+    @apply border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.03)] -translate-y-1 shadow-[0_8px_30px_rgba(0,0,0,0.5)];
+  }
+
+  .btn-primary {
+    @apply bg-white text-black rounded-full h-[32px] px-[16px] transition-all ease-out duration-300 flex items-center justify-center font-medium text-[12px];
+  }
+  .btn-primary:hover {
+    @apply bg-[#E0E0E0] scale-[1.02] shadow-[0_0_15px_rgba(255,255,255,0.3)];
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border border-border-default text-text-secondary rounded-[var(--r-md)] h-[34px] px-[14px] transition-all ease-in-out duration-[120ms] flex items-center justify-center font-medium;
+  }
+  .btn-ghost:hover {
+    @apply bg-bg-raised border-border-strong text-text-primary;
+  }
+
+  .input-base {
+    @apply bg-transparent border-2 border-border-default rounded-[var(--r-md)] px-3 text-[13px] placeholder:text-text-muted transition-all duration-[150ms] outline-none;
+    color: #FFFFFF !important;
+  }
+  .input-base::placeholder {
+    color: #444444 !important;
+  }
+  .input-base:focus {
+    @apply border-border-violet;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+  }
+  /* Ensure native selects and options are readable in dark theme (Chromium browsers) */
+  select.input-base {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: transparent;
+    color: var(--text-primary) !important;
+  }
+  /* Style options in the native dropdown where supported */
+  select.input-base option {
+    color: var(--text-primary) !important;
+    background-color: var(--bg-surface) !important;
+  }
+  /* Also target plain option elements inside our forms */
+  option {
+    color: var(--text-primary);
+    background-color: var(--bg-surface);
+  }
+
+  .nav-item {
+    @apply relative flex items-center h-[32px] px-3 text-[12px] font-medium text-[#666666] transition-all duration-300 gap-3 rounded-md;
+  }
+  .nav-item:hover {
+    @apply text-white bg-[rgba(255,255,255,0.03)];
+  }
+  .nav-item.active {
+    @apply text-white bg-[rgba(255,255,255,0.06)];
+  }
+  .nav-item.active svg {
+    @apply text-white;
+  }
+
+  .task-card-kanban {
+    @apply bg-bg-raised border border-border-subtle rounded-[var(--r-md)] p-[12px_14px] transition-all ease-out duration-[120ms] border-l-[3px] border-l-transparent cursor-pointer;
+  }
+  .task-card-kanban:hover {
+    @apply border-border-subtle border-l-border-violet bg-bg-overlay -translate-y-[2px];
+  }
+
+  .badge-pill {
+    @apply text-[10px] font-medium h-[20px] px-[8px] rounded-full flex items-center justify-center uppercase tracking-wider;
+  }
+  
+  .badge-todo {
+    @apply bg-transparent text-[#666666] border border-[#333333];
+  }
+  .badge-progress {
+    @apply bg-transparent text-white border border-[rgba(255,255,255,0.2)];
+  }
+  .badge-review {
+    @apply bg-transparent text-amber border border-[rgba(251,191,36,0.3)];
+  }
+  .badge-done {
+    @apply bg-transparent text-green border border-[rgba(52,211,153,0.3)];
+  }
+
+  .avatar-stack {
+    @apply flex items-center;
+  }
+  .avatar-stack > * {
+    @apply -ml-2 border-[2px] border-bg-base;
+  }
+  .avatar-stack > *:first-child {
+    @apply ml-0;
+  }
+
+  .page-transition {
+    animation: pageFadeIn 180ms ease-out forwards;
+  }
+
+  @keyframes pageFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes growWidth {
+    from {
+      width: 0%;
+    }
+  }
+  
+  /* Typography */
+  /* Typography */
+  .heading-page { @apply text-[28px] font-light tracking-tight text-white; }
+  .heading-section { @apply text-[10px] font-medium text-[#444444] uppercase tracking-[0.2em]; }
+  .heading-card { @apply text-[14px] font-medium text-white; }
+  .text-body { @apply text-[13px] font-normal text-[#888] leading-[1.6]; }
+  .text-label { @apply text-[11px] font-medium text-[#666] uppercase tracking-wider; }
+  .text-caption { @apply text-[10px] font-normal text-[#444]; }
+  .text-stat { @apply text-[40px] font-light tracking-tighter text-white; }
 }
-
-.card-hover { transition: all 150ms ease; }
-.card-hover:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
-.transition-fast { transition: all 150ms ease; }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in { animation: fadeIn 200ms ease; }
 

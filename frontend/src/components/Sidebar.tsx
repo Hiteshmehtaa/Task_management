@@ -1,73 +1,117 @@
-import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import React from 'react';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
+import { LayoutDashboard, FolderKanban, Inbox, Plus, LogOut } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '../store/auth';
+import { logout as logoutApi } from '../api/auth';
+import { listProjects, type Project } from '../api/projects';
 
-const items = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/projects', label: 'Projects' },
-  { to: '/settings', label: 'Settings' }
-]
+function getProjectColorClass(id: string) {
+  const colors = [
+    { bg: 'bg-violet', shadow: 'rgba(124,58,237,0.5)' },
+    { bg: 'bg-green', shadow: 'rgba(16,185,129,0.5)' },
+    { bg: 'bg-amber', shadow: 'rgba(245,158,11,0.5)' },
+    { bg: 'bg-blue-500', shadow: 'rgba(59,130,246,0.5)' },
+    { bg: 'bg-rose-500', shadow: 'rgba(244,63,94,0.5)' },
+  ];
+  // naive pseudo-random based on id
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = hash + id.charCodeAt(i);
+  return colors[hash % colors.length];
+}
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(false)
+  const navigate = useNavigate();
+  const { clear, user } = useAuthStore();
+  const { data: projects = [] } = useQuery<Project[]>(['projects'], listProjects, {
+    enabled: Boolean(user)
+  });
+
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error('Logout API error:', error);
+    }
+    clear();
+    navigate('/login');
+  };
+
+  const mainNav = [
+    { name: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Projects', icon: FolderKanban, path: '/projects' },
+    { name: 'Inbox', icon: Inbox, path: '/inbox' },
+  ];
 
   return (
-    <>
-      {/* Mobile toggle */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="md:hidden fixed top-4 left-4 z-40 p-2.5 rounded-xl bg-surface border border-border shadow-lg shadow-black/20"
-        aria-label="Toggle navigation"
-      >
-        ☰
-      </button>
+    <aside className="w-[216px] flex-shrink-0 h-screen bg-black border-r border-[rgba(255,255,255,0.02)] flex flex-col pt-[32px] pb-[24px]">
+      <div className="px-6 mb-12 flex items-center gap-3">
+        <div className="w-[12px] h-[12px] rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+        <span className="text-[14px] font-medium text-white tracking-wide">Taskflow</span>
+      </div>
 
-      {/* Overlay for mobile */}
-      {open && <div className="md:hidden fixed inset-0 bg-black/50 z-30" onClick={() => setOpen(false)} />}
-
-      {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{ x: open ? 0 : -256 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="md:translate-x-0 fixed md:relative w-56 lg:w-60 bg-surface/95 backdrop-blur-md border-r border-border min-h-screen p-3 flex flex-col z-30"
-      >
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="mb-6 rounded-2xl border border-border bg-[rgba(255,255,255,0.02)] p-3 lg:p-4">
-          <div className="text-xs uppercase tracking-[0.24em] text-text-secondary">Workspace</div>
-          <div className="mt-2 text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-primaryHover bg-clip-text text-transparent">
-            Task Hub
-          </div>
-          <p className="mt-2 text-xs text-text-secondary leading-5">
-            Minimal task management for small teams.
-          </p>
-        </motion.div>
-        <nav className="space-y-1 flex-1">
-          {items.map((i, idx) => (
+      <div className="px-3 mb-10">
+        <h3 className="heading-section px-3 mb-4">Menu</h3>
+        <div className="flex flex-col gap-0.5">
+          {mainNav.map((item) => (
             <NavLink
-              key={i.to}
-              to={i.to}
-              onClick={() => setOpen(false)}
-              className={({ isActive }) => `block px-3 py-2 rounded-md transition-all relative overflow-hidden text-sm md:text-base ${
-                isActive ? 'text-white' : 'text-text-secondary hover:text-text-primary'
-              }`}
+              key={item.name}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             >
-              {({ isActive }) => (
-                <>
-                  {isActive && <motion.div layoutId="nav-active" className="absolute inset-0 bg-primary rounded-md" initial={false} transition={{ type: 'spring', stiffness: 500, damping: 30 }} />}
-                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.05 }} className="relative z-10">
-                    {i.label}
-                  </motion.span>
-                </>
+              <item.icon size={16} />
+              <span>{item.name}</span>
+              {item.count && (
+                <span className="ml-auto text-[10px] text-[#888]">
+                  {item.count}
+                </span>
               )}
             </NavLink>
           ))}
-        </nav>
-
-        <div className="mt-4 rounded-2xl border border-border bg-[rgba(255,255,255,0.02)] p-3 lg:p-4 text-xs text-text-secondary">
-          <div className="font-medium text-text-primary">Tip</div>
-          <div className="mt-1 leading-5">Create a project first, then tasks will make the dashboard come alive.</div>
         </div>
-      </motion.aside>
-    </>
-  )
+      </div>
+
+      <div className="px-3 flex-1 overflow-y-auto">
+        <div className="flex items-center justify-between px-3 mb-4">
+          <h3 className="heading-section">Projects</h3>
+          <Link to="/projects" className="text-[#444] hover:text-white transition-colors">
+            <Plus size={14} />
+          </Link>
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {projects.slice(0, 8).map((proj) => {
+            const colorTheme = getProjectColorClass(proj.id);
+            return (
+              <NavLink key={proj.id} to={`/projects/${proj.id}`} className={({ isActive }) => `nav-item cursor-pointer ${isActive ? 'active' : ''}`}>
+                <div className={`w-[8px] h-[8px] rounded-full ${colorTheme.bg}`} style={{ boxShadow: `0 0 6px ${colorTheme.shadow}` }} />
+                <span className="truncate">{proj.name}</span>
+              </NavLink>
+            )
+          })}
+          {projects.length === 0 && (
+            <div className="px-3 text-[12px] text-[#666] italic">No projects yet</div>
+          )}
+        </div>
+      </div>
+
+      <div className="px-6 pt-6 mt-4 border-t border-[rgba(255,255,255,0.05)]">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-[28px] h-[28px] rounded-full bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] text-white flex items-center justify-center text-[10px] font-medium shrink-0 group-hover:border-white transition-colors duration-300 uppercase">
+            {user?.name?.[0] || 'U'}
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[12px] font-medium text-white truncate">{user?.name || 'User'}</span>
+            <span className="text-[10px] text-[#666] truncate capitalize">{user?.role?.toLowerCase() || 'Member'}</span>
+          </div>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-[#888] hover:text-white hover:bg-[rgba(255,255,255,0.03)] rounded transition-colors duration-200"
+        >
+          <LogOut size={14} />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+  );
 }

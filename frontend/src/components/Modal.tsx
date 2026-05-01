@@ -5,7 +5,7 @@ export default function Modal({ open, onClose, title, children }: { open: boolea
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="bg-surface border border-border rounded p-6 z-10 w-full max-w-lg">
+      <div className="w-full max-w-[640px] bg-bg-surface border border-border-default rounded-[var(--r-xl)] p-6 z-10">
         {title ? <div className="text-lg mb-4">{title}</div> : null}
         {children}
       </div>

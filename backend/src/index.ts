@@ -4,7 +4,9 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRouter from './routes/auth'
 import projectsRouter from './routes/projects'
+import userJoinRequestsRouter from './routes/userJoinRequests'
 import tasksRouter from './routes/tasks'
+import notificationsRouter from './routes/notifications'
 import dashboardRouter from './routes/dashboard'
 import commentsRouter from './routes/comments'
 import { errorHandler } from './middleware/errorHandler'
@@ -19,8 +21,10 @@ app.use(cookieParser())
 app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }))
 
 app.use('/api/auth', authRouter)
+app.use('/api/users', userJoinRequestsRouter)
 app.use('/api/projects', projectsRouter)
 app.use('/api', tasksRouter)
+app.use('/api/notifications', notificationsRouter)
 app.use('/api', commentsRouter)
 app.use('/api/dashboard', dashboardRouter)
 
